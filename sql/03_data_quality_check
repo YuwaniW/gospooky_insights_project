@@ -1,0 +1,46 @@
+-- Run before EVERY report delivery
+-- All values must return 0
+
+SELECT
+  'null_post_ids'       AS check_name,
+  COUNTIF(post_id IS NULL) AS failures
+FROM gospooky-insights.gospooky_insights.raw_posts
+
+UNION ALL
+
+SELECT
+  'zero_or_negative_reach',
+  COUNTIF(reach <= 0)
+FROM gospooky-insights.gospooky_insights.raw_posts
+
+UNION ALL
+
+SELECT
+  'impossible_engagement_rate',
+  COUNTIF(engagement_rate > 100 OR engagement_rate < 0)
+FROM gospooky-insights.gospooky_insights.raw_posts
+
+UNION ALL
+
+SELECT
+  'future_post_dates',
+  COUNTIF(post_date > CURRENT_DATE())
+FROM gospooky-insights.gospooky_insights.raw_posts
+
+UNION ALL
+
+SELECT
+  'missing_platform',
+  COUNTIF(platform NOT IN ('tiktok', 'meta'))
+FROM gospooky-insights.gospooky_insights.raw_posts
+
+UNION ALL
+
+SELECT
+  'impressions_less_than_reach',
+  COUNTIF(impressions < reach)
+FROM gospooky-insights.gospooky_insights.raw_posts
+;
+
+-- Expected output: all failures = 0
+-- If any > 0, investigate before sending reports
